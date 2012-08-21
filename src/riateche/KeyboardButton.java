@@ -1,7 +1,10 @@
 package riateche;
 
+import java.util.ArrayList;
+
 import android.content.Context;
 import android.os.Handler;
+import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -13,6 +16,10 @@ public class KeyboardButton extends Button {
     SYSTEM_MENU,
     REGULAR
   }
+  
+  public interface OnHoldListener {
+    void onKeyboardButtonHold(KeyboardButton target);
+  }
 
   public int number; //! General number of the button
   public int x, y;   //! Axis number of the button
@@ -20,13 +27,15 @@ public class KeyboardButton extends Button {
   public int regularNumber; //! Only for type == REGULAR; number of the button over all regular buttons  
   public String singlePressLetter = null; 
   
+  private ArrayList<OnHoldListener> onHoldListeners = new ArrayList<OnHoldListener>();
+  
   
   private final int repeatSpeed = 50;
   private final int repeatDelay = 500;
 
 
-  public KeyboardButton(Context context) {
-    super(context);
+  public KeyboardButton(Context context, AttributeSet attrs) {
+    super(context, attrs);
 
     setOnTouchListener(new View.OnTouchListener() {
       private Handler handler;
@@ -49,7 +58,7 @@ public class KeyboardButton extends Button {
 
       Runnable action = new Runnable() {
         @Override public void run() {
-          performClick();
+          fireHoldEvent();
           handler.postDelayed(this, repeatSpeed);
         }
       };
@@ -57,6 +66,16 @@ public class KeyboardButton extends Button {
     });
 
 
+  }
+  
+  public void addOnHoldListener(OnHoldListener listener) {
+    onHoldListeners.add(listener);
+  }
+  
+  private void fireHoldEvent() {
+    for(OnHoldListener listener : onHoldListeners) {
+      listener.onKeyboardButtonHold(this);
+    }
   }
 
 }

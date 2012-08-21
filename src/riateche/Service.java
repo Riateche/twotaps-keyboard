@@ -64,7 +64,7 @@ public class Service extends InputMethodService {
         b.setText("found\nx=" + x + "\ny=" + y);
       }
     }
-    return v; */
+    return v;  */
     return new KeyboardView(this);
   }
 

@@ -1,5 +1,15 @@
 <resources>
 
-    <style name="AppTheme" parent="android:Theme.Light" />
+    <style name="AppTheme" parent="android:Theme.Light" >
+        
+    </style>
+    
+    <style name="Button_candidate">
+            <item name="android:textSize">4mm</item>
+    </style>
+    <style name="Button_regular">
+            <item name="android:textSize">2mm</item>
+    </style>
+    
 
 </resources>

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import riateche.KeyboardButton.Type;
 import riateche.twotaps.R;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
@@ -13,7 +14,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.LinearLayout;
 
-public class KeyboardView extends LinearLayout  implements OnClickListener {
+public class KeyboardView extends LinearLayout  implements OnClickListener, KeyboardButton.OnHoldListener {
   private Service service;
   private Point buttonsCount                = new Point(5, 3);
   private ArrayList<KeyboardButton> buttons = new ArrayList<KeyboardButton>();
@@ -26,12 +27,16 @@ public class KeyboardView extends LinearLayout  implements OnClickListener {
   public KeyboardView(Service service) {
     super(service);
     this.service = service;
-    inflate(service, R.layout.keyboard, null);
+    //service.getLayoutInflater().inflate(resource, root)
+    inflate(service, R.layout.keyboard, this);
     
-    
+    Resources r = service.getResources();
     for(int y = 0; y < buttonsCount.y; y++) {
       for(int x = 0; x < buttonsCount.x; x++) {
-        KeyboardButton b = new KeyboardButton(service);
+        int res_id = r.getIdentifier("button" + (y+1) + "_" + (x+1), "id", "riateche.twotaps");
+        Log.i("", "res_id " + res_id);
+        KeyboardButton b = (KeyboardButton) findViewById(res_id);
+        Log.i("", "b " + b);
         b.number = x + y * buttonsCount.x;
         b.x = x;
         b.y = y;
@@ -47,20 +52,10 @@ public class KeyboardView extends LinearLayout  implements OnClickListener {
           b.type = Type.REGULAR;
           b.regularNumber = x + y * (buttonsCount.x - 1);
         }
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-            LayoutParams.FILL_PARENT, 
-            LayoutParams.FILL_PARENT, 
-            1);
-        params.setMargins(1, 1, 1, 1);
-        b.setLayoutParams(params);
-        b.setCompoundDrawablePadding(0);
-        b.setPadding(0, 0, 0, 0);
-        b.setBackgroundColor(Color.BLACK);
-        b.setTextColor(Color.WHITE);
-        b.setTypeface(Typeface.MONOSPACE);  
-        //b.setBackgroundDrawable(service.getResources().getDrawable(R.dra));
+        
         
         b.setOnClickListener(this);
+        b.addOnHoldListener(this);
         buttons.add(b);
       }
     }
@@ -79,19 +74,6 @@ public class KeyboardView extends LinearLayout  implements OnClickListener {
       }
     }
     
-    
-    
-    
-    setOrientation(LinearLayout.VERTICAL);
-    for(int row = 0; row < buttonsCount.y; row++) {
-      LinearLayout l = new LinearLayout(service);
-      l.setOrientation(LinearLayout.HORIZONTAL);
-      for(int x = 0; x < buttonsCount.x; x++) {
-        l.addView(buttons.get(x + row * buttonsCount.x));
-      }
-      addView(l);      
-    }    
-    setBackgroundColor(Color.BLACK);
     updateButtonsText();
   }
   
@@ -104,10 +86,11 @@ public class KeyboardView extends LinearLayout  implements OnClickListener {
     return null;
   }
   
-  private void updateButtonsText() {
-    for(int i = 0; i < buttons.size(); i++) {
+  private void updateButtonsText() {    
+    for(KeyboardButton button: buttons) {
+      boolean candidate = false;
       String text;
-      KeyboardButton button = buttons.get(i); 
+      //KeyboardButton button = buttons.get(i); 
       switch(button.type) {
       case BACKSPACE: 
         text = "\nbksp\n";
@@ -124,7 +107,8 @@ public class KeyboardView extends LinearLayout  implements OnClickListener {
             if (button.singlePressLetter.equals(" ")) {
               text = "\nspace\n";
             } else {
-              text = "\n" + button.singlePressLetter + "\n";
+              candidate = true;
+              text = button.singlePressLetter;
             }
           } else {
             text = "";
@@ -137,6 +121,7 @@ public class KeyboardView extends LinearLayout  implements OnClickListener {
                 letterAt(button, getButtonByRegularNumber(regularButtonsCount - 1)); */ 
           }
         } else {
+          candidate = true;
           text = letterAt(firstButton, button);
         }
         break;
@@ -144,14 +129,28 @@ public class KeyboardView extends LinearLayout  implements OnClickListener {
         text = "";  
       }
       button.setText(text);
+      if (candidate) {
+        button.setTextAppearance(service, R.style.Button_candidate);
+      } else {
+        button.setTextAppearance(service, R.style.Button_regular);
+      }
     }
   }
   
   @Override
   public void onClick(View v) {
-    KeyboardButton button = (KeyboardButton) v;
+    onClickOrHold( (KeyboardButton) v, false);
+  }
+
+  @Override
+  public void onKeyboardButtonHold(KeyboardButton target) {
+    onClickOrHold(target, true);
+  }
+
+  
+  private void onClickOrHold(KeyboardButton button, boolean hold) {
     if (button.type == Type.SHIFT) {
-      shiftPressed = !shiftPressed;
+      if (!hold) shiftPressed = !shiftPressed;
     } else if (button.type == Type.BACKSPACE) {
       if (firstButton == null) {
         service.sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL);
@@ -162,17 +161,19 @@ public class KeyboardView extends LinearLayout  implements OnClickListener {
       if (firstButton == null) {
         if (button.singlePressLetter != null) {
           service.typeLetter(button.singlePressLetter);          
-          shiftPressed = false;
+          if (!hold) shiftPressed = false;
         } else {
-          firstButton = button;
+          if (!hold) firstButton = button;
         }
       } else {
         service.typeLetter(letterAt(firstButton, button));
-        shiftPressed = false;
-        firstButton = null;        
+        if (!hold) {
+          shiftPressed = false;
+          firstButton = null;        
+        }
       }
     }
-    updateButtonsText();       
+    updateButtonsText();           
   }
   
   private String letterAt(KeyboardButton firstButton, KeyboardButton secondButton) {
