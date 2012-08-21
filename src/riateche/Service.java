@@ -52,19 +52,7 @@ public class Service extends InputMethodService {
         allLetters.addAll(letterSets.get(i).letters);
       }
     }
-    /*
-    LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-    View v = inflater.inflate(R.layout.keyboard, null);
-    Resources r = getResources();
-    for(int x = 1; x <= 5; x++) {
-      for(int y = 1; y <= 3; y++) {
-        int res_id = r.getIdentifier("button" + y + "_" + x, "id", "riateche.twotaps");
-//        Log.i()
-        Button b = (Button) v.findViewById(res_id);
-        b.setText("found\nx=" + x + "\ny=" + y);
-      }
-    }
-    return v;  */
+
     return new KeyboardView(this);
   }
 

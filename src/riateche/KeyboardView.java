@@ -2,6 +2,7 @@ package riateche;
 
 import java.util.ArrayList;
 
+import riateche.KeyboardButton.System_command;
 import riateche.KeyboardButton.Type;
 import riateche.twotaps.R;
 import android.content.res.Resources;
@@ -21,7 +22,10 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
   
   private final int regularButtonsCount = 12;
   private boolean shiftPressed = false;
+  private boolean capsEnabled = false;
+  private boolean inSystemMenu = false;
   private KeyboardButton firstButton = null; // pressed button (or null if none was pressed)
+  private boolean numericMode = false;
   
 
   public KeyboardView(Service service) {
@@ -59,14 +63,27 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
         buttons.add(b);
       }
     }
-        
-
+    buttons.get(0).system_command = System_command.CAPS_LOCK;    
+    buttons.get(1).system_command = System_command.NUMERIC;    
+    buttons.get(0).numericModeLetter = "1";
+    buttons.get(1).numericModeLetter = "2";
+    buttons.get(2).numericModeLetter = "3";
+    buttons.get(3).numericModeLetter = "*";
+    buttons.get(5).numericModeLetter = "4";
+    buttons.get(6).numericModeLetter = "5";
+    buttons.get(7).numericModeLetter = "6";
+    buttons.get(8).numericModeLetter = "#";
+    buttons.get(9).numericModeLetter = "+";
+    buttons.get(10).numericModeLetter = "7";
+    buttons.get(11).numericModeLetter = "8";
+    buttons.get(12).numericModeLetter = "9";
+    buttons.get(13).numericModeLetter = "0";
     
     int singlePressButtonsCount = regularButtonsCount - 
         (int) Math.ceil(service.getAllLetters().size() / (double) regularButtonsCount);
     Log.i("", "rbc" + regularButtonsCount + " count=" + service.getAllLetters().size() + " r=" + singlePressButtonsCount);
     //TODO: most used letters here
-    String[] best_keys = { " ", ".", ",", "a", "e", "o" }; 
+    String[] best_keys = { "\n", " ", "," }; 
     for(int i = regularButtonsCount - singlePressButtonsCount; i < regularButtonsCount; i++) {        
       int best_key_id = i - regularButtonsCount + singlePressButtonsCount;
       if (best_key_id < best_keys.length) {
@@ -87,52 +104,92 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
   }
   
   private void updateButtonsText() {    
-    for(KeyboardButton button: buttons) {
-      boolean candidate = false;
-      String text;
-      //KeyboardButton button = buttons.get(i); 
-      switch(button.type) {
-      case BACKSPACE: 
-        text = "\nbksp\n";
-        break;
-      case SYSTEM_MENU: 
-        text = "\nsys\n";
-        break;
-      case SHIFT: 
-        text = "\nshift\n";
-        break;
-      case REGULAR:
-        if (firstButton == null) {
-          if (button.singlePressLetter != null) {
-            if (button.singlePressLetter.equals(" ")) {
-              text = "\nspace\n";
+    if (inSystemMenu) {
+      for(KeyboardButton button: buttons) {
+        button.setLargeText(false);
+      }
+      for(KeyboardButton button: buttons) {
+        if (button.type == Type.BACKSPACE) {
+          button.setText("back");
+        } else {
+          if (button.system_command == null) {
+            button.setText("");
+          } else {
+            switch(button.system_command) {
+            case CAPS_LOCK: 
+              button.setText("caps");
+              break;
+            case NUMERIC:
+              button.setText("123");              
+            }
+          }
+        }
+      }      
+    } else if (numericMode) {
+      for(KeyboardButton button: buttons) {
+        if (button.type == Type.BACKSPACE) {
+          button.setLargeText(false);
+          button.setText("bksp");
+        } else if (button.type == Type.SYSTEM_MENU) {
+          button.setLargeText(false);
+          button.setText("ABC");          
+        } else if (button.numericModeLetter != null) {
+          button.setLargeText(true);
+          button.setText(button.numericModeLetter);
+          
+        }
+      }
+    
+    } else {    
+      for(KeyboardButton button: buttons) {
+        boolean candidate = false;
+        String text;
+        //KeyboardButton button = buttons.get(i); 
+        switch(button.type) {
+        case BACKSPACE:
+          if (firstButton == null) {
+            text = "bksp";
+          } else {
+            text = "back";
+          }
+          break;
+        case SYSTEM_MENU: 
+          text = "sys";
+          break;
+        case SHIFT: 
+          text = "shift";
+          break;
+        case REGULAR:
+          if (firstButton == null) {
+            if (button.singlePressLetter != null) {
+              if (button.singlePressLetter.equals(" ")) {
+                text = "space";
+              } else if (button.singlePressLetter.equals("\n")) {
+                text = "enter";
+              } else {
+                candidate = true;
+                text = button.singlePressLetter;
+              }
             } else {
-              candidate = true;
-              text = button.singlePressLetter;
+              text = "";
+              for(int j = 0; j < regularButtonsCount; j ++) {
+                if (j % 4 == 0 && j > 0) text += "\n"; 
+                text += letterAt(button, getButtonByRegularNumber(j));
+              }
+              /*text = letterAt(button, getButtonByRegularNumber(0)) + " " + 
+                  letterAt(button, getButtonByRegularNumber(regularButtonsCount / 2)) + " " + 
+                  letterAt(button, getButtonByRegularNumber(regularButtonsCount - 1)); */ 
             }
           } else {
-            text = "";
-            for(int j = 0; j < regularButtonsCount; j ++) {
-              if (j % 4 == 0 && j > 0) text += "\n"; 
-              text += letterAt(button, getButtonByRegularNumber(j));
-            }
-            /*text = letterAt(button, getButtonByRegularNumber(0)) + " " + 
-                letterAt(button, getButtonByRegularNumber(regularButtonsCount / 2)) + " " + 
-                letterAt(button, getButtonByRegularNumber(regularButtonsCount - 1)); */ 
+            candidate = true;
+            text = letterAt(firstButton, button);
           }
-        } else {
-          candidate = true;
-          text = letterAt(firstButton, button);
+          break;
+        default:
+          text = "";  
         }
-        break;
-      default:
-        text = "";  
-      }
-      button.setText(text);
-      if (candidate) {
-        button.setTextAppearance(service, R.style.Button_candidate);
-      } else {
-        button.setTextAppearance(service, R.style.Button_regular);
+        button.setText(text);
+        button.setLargeText(candidate);
       }
     }
   }
@@ -149,27 +206,51 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
 
   
   private void onClickOrHold(KeyboardButton button, boolean hold) {
-    if (button.type == Type.SHIFT) {
-      if (!hold) shiftPressed = !shiftPressed;
-    } else if (button.type == Type.BACKSPACE) {
-      if (firstButton == null) {
-        service.sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL);
-      } else {
-        firstButton = null;
-      }
-    } else if (button.type == Type.REGULAR) {
-      if (firstButton == null) {
-        if (button.singlePressLetter != null) {
-          service.typeLetter(button.singlePressLetter);          
-          if (!hold) shiftPressed = false;
-        } else {
-          if (!hold) firstButton = button;
+    if (inSystemMenu) {
+      if (!hold) {
+        if (button.type == Type.BACKSPACE) {
+          inSystemMenu = false;          
+        } else if (button.system_command == System_command.CAPS_LOCK) {
+          capsEnabled = !capsEnabled;
+          inSystemMenu = false;          
+        } else if (button.system_command == System_command.NUMERIC) {
+          numericMode  = true;
+          inSystemMenu = false;          
         }
-      } else {
-        service.typeLetter(letterAt(firstButton, button));
-        if (!hold) {
-          shiftPressed = false;
-          firstButton = null;        
+      }
+    } else if (numericMode) {
+      if (button.type == Type.SYSTEM_MENU) {
+        numericMode = false;
+      } else if (button.type == Type.BACKSPACE) {
+        service.sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL);        
+      } else if (button.numericModeLetter != null) {
+        service.typeLetter(button.numericModeLetter);
+      }
+    } else {    
+      if (button.type == Type.SHIFT) {
+        if (!hold) shiftPressed = !shiftPressed;
+      } else if (button.type == Type.SYSTEM_MENU) {
+        inSystemMenu = true;
+      } else if (button.type == Type.BACKSPACE) {
+        if (firstButton != null) {
+          firstButton = null;
+        } else {
+          service.sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL);
+        }
+      } else if (button.type == Type.REGULAR) {
+        if (firstButton == null) {
+          if (button.singlePressLetter != null) {
+            service.typeLetter(button.singlePressLetter);          
+            if (!hold) shiftPressed = false;
+          } else {
+            if (!hold) firstButton = button;
+          }
+        } else {
+          service.typeLetter(letterAt(firstButton, button));
+          if (!hold) {
+            shiftPressed = false;
+            firstButton = null;        
+          }
         }
       }
     }
@@ -179,7 +260,7 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
   private String letterAt(KeyboardButton firstButton, KeyboardButton secondButton) {
     try {
       String s = service.getAllLetters().get(firstButton.regularNumber * regularButtonsCount + secondButton.regularNumber);
-      if (shiftPressed) s = s.toUpperCase();      
+      if (capsEnabled ^ shiftPressed) s = s.toUpperCase();      
       return s;
     } catch (IndexOutOfBoundsException e) {
       return "";

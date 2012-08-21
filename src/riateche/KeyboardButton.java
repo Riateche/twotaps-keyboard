@@ -2,6 +2,8 @@ package riateche;
 
 import java.util.ArrayList;
 
+import riateche.twotaps.R;
+
 import android.content.Context;
 import android.os.Handler;
 import android.util.AttributeSet;
@@ -17,6 +19,12 @@ public class KeyboardButton extends Button {
     REGULAR
   }
   
+  enum System_command {
+    CAPS_LOCK,
+//    SETTINGS,
+    NUMERIC
+  }
+  
   public interface OnHoldListener {
     void onKeyboardButtonHold(KeyboardButton target);
   }
@@ -26,6 +34,9 @@ public class KeyboardButton extends Button {
   public Type type;   
   public int regularNumber; //! Only for type == REGULAR; number of the button over all regular buttons  
   public String singlePressLetter = null; 
+  public System_command system_command = null;
+  public String numericModeLetter = null;
+  private boolean largeText = false;
   
   private ArrayList<OnHoldListener> onHoldListeners = new ArrayList<OnHoldListener>();
   
@@ -75,6 +86,13 @@ public class KeyboardButton extends Button {
   private void fireHoldEvent() {
     for(OnHoldListener listener : onHoldListeners) {
       listener.onKeyboardButtonHold(this);
+    }
+  }
+  
+  public void setLargeText(boolean enabled) {
+    if (largeText != enabled) {
+      largeText = enabled;
+      setTextAppearance(getContext(), largeText? R.style.Button_candidate: R.style.Button_regular);
     }
   }
 
