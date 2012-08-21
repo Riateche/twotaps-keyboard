@@ -10,9 +10,11 @@ import java.util.Arrays;
 import riateche.twotaps.R;
 import android.content.res.Resources;
 import android.inputmethodservice.InputMethodService;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 
 public class Service extends InputMethodService {
@@ -20,6 +22,7 @@ public class Service extends InputMethodService {
   private ArrayList<String> allLetters      = new ArrayList<String>(); //TODO: only chosen letters 
   
   public ArrayList<String> getAllLetters() { return allLetters; }
+  private KeyboardView view;
   
   private void readLetterSets() {
     Resources res = getResources();
@@ -45,7 +48,8 @@ public class Service extends InputMethodService {
     }
   }
 
-  @Override public View onCreateInputView() {   
+  @Override 
+  public View onCreateInputView() {   
     if (letterSets.isEmpty()) {
       readLetterSets();
       for(int i = 0; i < letterSets.size(); i++) {
@@ -53,11 +57,18 @@ public class Service extends InputMethodService {
       }
     }
 
-    return new KeyboardView(this);
+    view = new KeyboardView(this);
+    return view;
   }
 
   
-  
+  @Override 
+  public void onStartInputView (EditorInfo info, boolean restarting) {
+    if (view != null) {
+      int bit =info.inputType & InputType.TYPE_MASK_CLASS;
+      view.setNumericMode(bit == InputType.TYPE_CLASS_NUMBER || bit == InputType.TYPE_CLASS_PHONE);
+    }    
+  }
   
   
   public void typeLetter(String letter) {

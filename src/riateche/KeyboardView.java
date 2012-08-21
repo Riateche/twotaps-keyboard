@@ -27,6 +27,11 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
   private KeyboardButton firstButton = null; // pressed button (or null if none was pressed)
   private boolean numericMode = false;
   
+  public void setNumericMode(boolean enabled) {
+    numericMode = enabled;
+    updateButtonsText();
+  }
+  
 
   public KeyboardView(Service service) {
     super(service);
