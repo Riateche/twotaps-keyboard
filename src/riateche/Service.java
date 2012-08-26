@@ -72,6 +72,7 @@ public class Service extends InputMethodService {
   
   
   public void typeLetter(String letter) {
+    if (letter.equals("↵")) letter = "\n";
     for(int i = 0; i < letter.length(); i++) {
       sendKeyChar(letter.charAt(i));
     }

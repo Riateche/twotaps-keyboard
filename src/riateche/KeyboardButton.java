@@ -27,8 +27,8 @@ public class KeyboardButton extends Button {
   
   public interface OnHoldListener {
     void onKeyboardButtonHold(KeyboardButton target);
-  }
-
+  } 
+  
   public int number; //! General number of the button
   public int x, y;   //! Axis number of the button
   public Type type;   
@@ -47,6 +47,7 @@ public class KeyboardButton extends Button {
 
   public KeyboardButton(Context context, AttributeSet attrs) {
     super(context, attrs);
+    setTextAppearance(getContext(), R.style.Button_regular);
 
     setOnTouchListener(new View.OnTouchListener() {
       private Handler handler;
