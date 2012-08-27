@@ -1,8 +1,8 @@
-package riateche;
+package org.idzaaus.twotaps;
 
 import java.util.ArrayList;
 
-import riateche.twotaps.R;
+import org.idzaaus.twotaps.R;
 
 import android.content.Context;
 import android.os.Handler;

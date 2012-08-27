@@ -1,10 +1,11 @@
-package riateche;
+package org.idzaaus.twotaps;
 
 import java.util.ArrayList;
 
-import riateche.KeyboardButton.System_command;
-import riateche.KeyboardButton.Type;
-import riateche.twotaps.R;
+import org.idzaaus.twotaps.KeyboardButton.System_command;
+import org.idzaaus.twotaps.KeyboardButton.Type;
+
+import org.idzaaus.twotaps.R;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -42,7 +43,7 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
     Resources r = service.getResources();
     for(int y = 0; y < buttonsCount.y; y++) {
       for(int x = 0; x < buttonsCount.x; x++) {
-        int res_id = r.getIdentifier("button" + (y+1) + "_" + (x+1), "id", "riateche.twotaps");
+        int res_id = r.getIdentifier("button" + (y+1) + "_" + (x+1), "id", "org.idzaaus.twotaps");
         Log.i("", "res_id " + res_id);
         KeyboardButton b = (KeyboardButton) findViewById(res_id);
         Log.i("", "b " + b);
@@ -67,7 +68,7 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
         b.addOnHoldListener(this);
         buttons.add(b);
       }
-    }
+    } 
     buttons.get(0).system_command = System_command.CAPS_LOCK;    
     buttons.get(1).system_command = System_command.NUMERIC;    
     buttons.get(0).numericModeLetter = "1";
@@ -90,12 +91,12 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
         (int) Math.ceil(service.getAllLetters().size() / (double) regularButtonsCount);
     Log.i("", "rbc" + regularButtonsCount + " count=" + service.getAllLetters().size() + " r=" + singlePressButtonsCount);
     //TODO: most used letters here
-    String[] best_keys = { ",", ".", " " }; 
+    String[] best_keys = { "", "", " " }; 
     for(int i = regularButtonsCount - singlePressButtonsCount; i < regularButtonsCount; i++) {        
       int best_key_id = i - regularButtonsCount + singlePressButtonsCount;
       if (best_key_id < best_keys.length) {
         getButtonByRegularNumber(i).singlePressLetter = best_keys[best_key_id];
-      }
+      } 
     }
     
     updateButtonsText();

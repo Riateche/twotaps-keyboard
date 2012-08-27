@@ -1,4 +1,4 @@
-package riateche;
+package org.idzaaus.twotaps;
 
 import java.util.ArrayList;
 

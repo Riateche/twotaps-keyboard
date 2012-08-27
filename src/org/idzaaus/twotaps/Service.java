@@ -1,4 +1,4 @@
-package riateche;
+package org.idzaaus.twotaps;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import riateche.twotaps.R;
+import org.idzaaus.twotaps.R; 
 import android.content.res.Resources;
 import android.inputmethodservice.InputMethodService;
 import android.text.InputType;

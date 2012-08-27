@@ -17,7 +17,7 @@
    id="svg2"
    inkscape:version="0.48.3.1 r9886"
    sodipodi:docname="space.svg"
-   inkscape:export-filename="/home/ri/my_programs/twotaps-keyboard/res/drawable-xhdpi/backspace.png"
+   inkscape:export-filename="/home/ri/my_programs/twotaps-keyboard/res/drawable-xhdpi/space.png"
    inkscape:export-xdpi="18"
    inkscape:export-ydpi="18"><metadata
    id="metadata11"><rdf:RDF><cc:Work
@@ -30,24 +30,21 @@
    objecttolerance="10"
    gridtolerance="10"
    guidetolerance="10"
-   inkscape:pageopacity="1"
+   inkscape:pageopacity="0"
    inkscape:pageshadow="2"
-   inkscape:window-width="1317"
-   inkscape:window-height="744"
+   inkscape:window-width="1366"
+   inkscape:window-height="712"
    id="namedview7"
    showgrid="false"
    inkscape:zoom="0.49166667"
-   inkscape:cx="38.939905"
+   inkscape:cx="-321.06009"
    inkscape:cy="213.70335"
-   inkscape:window-x="49"
-   inkscape:window-y="24"
+   inkscape:window-x="0"
+   inkscape:window-y="27"
    inkscape:window-maximized="1"
    inkscape:current-layer="svg2"
    showguides="true"
    inkscape:guide-bbox="true"><sodipodi:guide
-     orientation="0,1"
-     position="193.22034,80"
-     id="guide4452" /><sodipodi:guide
      orientation="0,1"
      position="256.27119,160"
      id="guide4454" /><sodipodi:guide
@@ -62,8 +59,8 @@
      id="guide4460" /></sodipodi:namedview>
   
 <path
-   style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-   d="m 44.745762,252.20339 6.101696,148.47458 376.271182,0 12.20339,-148.47458 -65.08474,0 -4.0678,79.32203 -258.30509,0 1e-5,-79.32203"
-   id="path3942"
+   style="fill:none;stroke:#ffffff;stroke-width:30;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+   d="m 80,282.71187 0,101.69491 320,-2.0339 0,-97.62711"
+   id="path2989"
    inkscape:connector-curvature="0"
-   sodipodi:nodetypes="cccccccc" /></svg>
+   sodipodi:nodetypes="cccc" /></svg>
