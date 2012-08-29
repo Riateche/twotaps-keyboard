@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Twotaps keyboard</string>
-    <string name="test">test\ntest\ntest</string>
+    <string name="test">abcd\nefgh\nijkl</string>
+    <string name="buttonContentDescription">-</string>
 </resources>

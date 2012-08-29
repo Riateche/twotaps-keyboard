@@ -14,7 +14,9 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 public class KeyboardView extends LinearLayout  implements OnClickListener, KeyboardButton.OnHoldListener {
   private Service service;
@@ -45,7 +47,8 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
       for(int x = 0; x < buttonsCount.x; x++) {
         int res_id = r.getIdentifier("button" + (y+1) + "_" + (x+1), "id", "org.idzaaus.twotaps");
         Log.i("", "res_id " + res_id);
-        KeyboardButton b = (KeyboardButton) findViewById(res_id);
+        View view = findViewById(res_id);
+        KeyboardButton b = new KeyboardButton(service, (ImageButton) view.findViewById(R.id.button), (TextView) view.findViewById(R.id.text));
         Log.i("", "b " + b);
         b.number = x + y * buttonsCount.x;
         b.x = x;
@@ -64,13 +67,14 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
         }
         
         
-        b.setOnClickListener(this);
+        b.imageButton.setOnClickListener(this);
         b.addOnHoldListener(this);
         buttons.add(b);
       }
     } 
     buttons.get(0).system_command = System_command.CAPS_LOCK;    
     buttons.get(1).system_command = System_command.NUMERIC;    
+    buttons.get(2).system_command = System_command.SETTINGS;    
     buttons.get(0).numericModeLetter = "1";
     buttons.get(1).numericModeLetter = "2";
     buttons.get(2).numericModeLetter = "3";
@@ -85,7 +89,7 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
     buttons.get(12).numericModeLetter = "9";
     buttons.get(13).numericModeLetter = "0";
     
-//    buttons.get(0).setBackgroundResource(R.drawable.backspace);
+//    buttons.get(0).setImageResource(R.drawable.backspace);
     
     int singlePressButtonsCount = regularButtonsCount - 
         (int) Math.ceil(service.getAllLetters().size() / (double) regularButtonsCount);
@@ -115,52 +119,52 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
     if (inSystemMenu) {
       for(KeyboardButton button: buttons) {
         button.setLargeText(false);
-      }  
-      for(KeyboardButton button: buttons) {
-        button.setBackgroundResource(R.drawable.key_background);
+        button.textView.setText("");
+        button.imageButton.setImageResource(R.drawable.key_background);
         if (button.type == Type.BACKSPACE) {
-          button.setBackgroundResource(R.drawable.key_backspace);
-          button.setText("");
+          button.imageButton.setImageResource(R.drawable.key_backspace);
         } else {
           if (button.system_command == null) {
-            button.setText("");
           } else { 
             switch(button.system_command) {
+            case SETTINGS: 
+              button.imageButton.setImageResource(R.drawable.key_settings2);
+              break;
             case CAPS_LOCK: 
-              button.setText("CAPS");
+              button.textView.setText("CAPS");
               break;
             case NUMERIC:
-              button.setText("123");              
+              button.textView.setText("123");              
             }
           }
         }
       }      
     } else if (numericMode) {
       for(KeyboardButton button: buttons) {
-        button.setBackgroundResource(R.drawable.key_background);
+        button.imageButton.setImageResource(R.drawable.key_background);
         if (button.type == Type.BACKSPACE) {
           button.setLargeText(false);
-          button.setBackgroundResource(R.drawable.key_backspace);
-          button.setText("");
+          button.imageButton.setImageResource(R.drawable.key_backspace);
+          button.textView.setText("");
         } else if (button.type == Type.SYSTEM_MENU) {
           button.setLargeText(false);
-          button.setText("ABC");          
+          button.textView.setText("ABC");          
         } else if (button.numericModeLetter != null) {
           button.setLargeText(true);
-          button.setText(button.numericModeLetter);
+          button.textView.setText(button.numericModeLetter);
           
         }
       }
     
     } else {     
       for(KeyboardButton button: buttons) {
-        button.setBackgroundResource(R.drawable.key_background);
+        button.imageButton.setImageResource(R.drawable.key_background);
         boolean candidate = false;
         String text;
         //KeyboardButton button = buttons.get(i); 
         switch(button.type) {
         case BACKSPACE:
-          button.setBackgroundResource(R.drawable.key_backspace);
+          button.imageButton.setImageResource(R.drawable.key_backspace);
           if (firstButton == null) {
             text = "";
           } else {
@@ -168,18 +172,18 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
           }
           break; 
         case SYSTEM_MENU: 
-          button.setBackgroundResource(R.drawable.key_settings);
+          button.imageButton.setImageResource(R.drawable.key_settings);
           text = "";
           break; 
         case SHIFT: 
           text = "";
-          button.setBackgroundResource(R.drawable.key_shift);
+          button.imageButton.setImageResource(R.drawable.key_shift);
           break;
         case REGULAR:
-          if (firstButton == null) {
+          if (firstButton == null) { 
             if (button.singlePressLetter != null) {
               if (button.singlePressLetter.equals(" ")) {
-                button.setBackgroundResource(R.drawable.key_space);
+                button.imageButton.setImageResource(R.drawable.key_space);
                 text = "";
               //} else if (button.singlePressLetter.equals("\n")) {
               //  text = "enter";
@@ -205,7 +209,7 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
         default:
           text = "";  
         }
-        button.setText(text);
+        button.textView.setText(text);
         button.setLargeText(candidate);
       }
     }
@@ -213,7 +217,13 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
   
   @Override
   public void onClick(View v) {
-    onClickOrHold( (KeyboardButton) v, false);
+    //TODO: optimize
+    for(KeyboardButton button: buttons) {
+      if (button.imageButton == v) {
+        onClickOrHold(button, false);
+        return;
+      }
+    }
   }
 
   @Override

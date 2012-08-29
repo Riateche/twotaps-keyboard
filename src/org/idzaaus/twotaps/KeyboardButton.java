@@ -4,14 +4,16 @@ import java.util.ArrayList;
 
 import org.idzaaus.twotaps.R;
 
-import android.content.Context;
+import android.content.res.Resources.NotFoundException;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
-public class KeyboardButton extends Button {
+public class KeyboardButton {
   enum Type {
     BACKSPACE,
     SHIFT,
@@ -21,14 +23,14 @@ public class KeyboardButton extends Button {
   
   enum System_command {
     CAPS_LOCK,
-//    SETTINGS,
+    SETTINGS,
     NUMERIC
   }
   
   public interface OnHoldListener {
     void onKeyboardButtonHold(KeyboardButton target);
   } 
-  
+    
   public int number; //! General number of the button
   public int x, y;   //! Axis number of the button
   public Type type;   
@@ -37,6 +39,14 @@ public class KeyboardButton extends Button {
   public System_command system_command = null;
   public String numericModeLetter = null;
   private boolean largeText = false;
+  public TextView textView = null;
+  public ImageButton imageButton = null;
+  private Service service = null;
+  
+/*  public void setTextView(TextView v) { 
+    textView = v;
+    largeText = false;
+  }*/
   
   private ArrayList<OnHoldListener> onHoldListeners = new ArrayList<OnHoldListener>();
   
@@ -45,11 +55,13 @@ public class KeyboardButton extends Button {
   private final int repeatDelay = 500;
 
 
-  public KeyboardButton(Context context, AttributeSet attrs) {
-    super(context, attrs);
-    setTextAppearance(getContext(), R.style.Button_regular);
+  public KeyboardButton(Service service, ImageButton imageButton, TextView textView) {
+    this.textView = textView;
+    this.imageButton = imageButton;
+    this.service = service;
+    textView.setTextAppearance(service, R.style.Button_regular);
 
-    setOnTouchListener(new View.OnTouchListener() {
+    imageButton.setOnTouchListener(new View.OnTouchListener() {
       private Handler handler;
 
       @Override public boolean onTouch(View v, MotionEvent event) {
@@ -93,8 +105,9 @@ public class KeyboardButton extends Button {
   public void setLargeText(boolean enabled) {
     if (largeText != enabled) {
       largeText = enabled;
-      setTextAppearance(getContext(), largeText? R.style.Button_candidate: R.style.Button_regular);
+      textView.setTextAppearance(service, largeText? R.style.Button_candidate: R.style.Button_regular);
     }
   }
+  
 
 }
