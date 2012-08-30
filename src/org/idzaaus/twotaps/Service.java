@@ -10,6 +10,7 @@ import java.util.Arrays;
 import org.idzaaus.twotaps.R; 
 import android.content.res.Resources;
 import android.inputmethodservice.InputMethodService;
+import android.preference.PreferenceManager;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -50,6 +51,8 @@ public class Service extends InputMethodService {
 
   @Override 
   public View onCreateInputView() {   
+    PreferenceManager.setDefaultValues(this, R.xml.keyboard_preferences, false);
+    
     if (letterSets.isEmpty()) {
       readLetterSets();
       for(int i = 0; i < letterSets.size(); i++) {

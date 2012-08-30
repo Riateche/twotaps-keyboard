@@ -6,10 +6,17 @@ import org.idzaaus.twotaps.KeyboardButton.System_command;
 import org.idzaaus.twotaps.KeyboardButton.Type;
 
 import org.idzaaus.twotaps.R;
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
+import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -18,7 +25,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class KeyboardView extends LinearLayout  implements OnClickListener, KeyboardButton.OnHoldListener {
+public class KeyboardView extends LinearLayout  implements OnClickListener, KeyboardButton.OnHoldListener, OnSharedPreferenceChangeListener {
   private Service service;
   private Point buttonsCount                = new Point(5, 3);
   private ArrayList<KeyboardButton> buttons = new ArrayList<KeyboardButton>();
@@ -29,7 +36,9 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
   private boolean inSystemMenu = false;
   private KeyboardButton firstButton = null; // pressed button (or null if none was pressed)
   private boolean numericMode = false;
-  
+  private boolean vibrate = true; 
+  private Vibrator vibrator;
+    
   public void setNumericMode(boolean enabled) {
     numericMode = enabled;
     updateButtonsText();
@@ -42,14 +51,17 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
     //service.getLayoutInflater().inflate(resource, root)
     inflate(service, R.layout.keyboard, this);
     
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(service);
+    preferences.registerOnSharedPreferenceChangeListener(this);
+    vibrate = preferences.getBoolean("vibration", false); 
+    vibrator = (Vibrator) service.getSystemService(Context.VIBRATOR_SERVICE);
+        
     Resources r = service.getResources();
     for(int y = 0; y < buttonsCount.y; y++) {
       for(int x = 0; x < buttonsCount.x; x++) {
         int res_id = r.getIdentifier("button" + (y+1) + "_" + (x+1), "id", "org.idzaaus.twotaps");
-        Log.i("", "res_id " + res_id);
         View view = findViewById(res_id);
         KeyboardButton b = new KeyboardButton(service, (ImageButton) view.findViewById(R.id.button), (TextView) view.findViewById(R.id.text));
-        Log.i("", "b " + b);
         b.number = x + y * buttonsCount.x;
         b.x = x;
         b.y = y;
@@ -75,19 +87,12 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
     buttons.get(0).system_command = System_command.CAPS_LOCK;    
     buttons.get(1).system_command = System_command.NUMERIC;    
     buttons.get(2).system_command = System_command.SETTINGS;    
-    buttons.get(0).numericModeLetter = "1";
-    buttons.get(1).numericModeLetter = "2";
-    buttons.get(2).numericModeLetter = "3";
-    buttons.get(3).numericModeLetter = "*";
-    buttons.get(5).numericModeLetter = "4";
-    buttons.get(6).numericModeLetter = "5";
-    buttons.get(7).numericModeLetter = "6";
-    buttons.get(8).numericModeLetter = "#";
-    buttons.get(9).numericModeLetter = "+";
-    buttons.get(10).numericModeLetter = "7";
-    buttons.get(11).numericModeLetter = "8";
-    buttons.get(12).numericModeLetter = "9";
-    buttons.get(13).numericModeLetter = "0";
+    String[] numericLayout = {"1", "2", "3", "*", null, "4", "5", "6", "#", "+", "7", "8", "9", "0" };
+    for(int i = 0; i < numericLayout.length; i++) {
+      if (numericLayout[i] != null) {
+        buttons.get(i).numericModeLetter = numericLayout[i];        
+      }
+    }
     
 //    buttons.get(0).setImageResource(R.drawable.backspace);
     
@@ -233,6 +238,9 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
 
   
   private void onClickOrHold(KeyboardButton button, boolean hold) {
+    if (vibrate) {
+      vibrator.vibrate(80);
+    }
     if (inSystemMenu) {
       if (!hold) {
         if (button.type == Type.BACKSPACE) {
@@ -242,7 +250,12 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
           inSystemMenu = false;          
         } else if (button.system_command == System_command.NUMERIC) {
           numericMode  = true;
-          inSystemMenu = false;          
+          inSystemMenu = false;
+        } else if (button.system_command == System_command.SETTINGS) {        
+          inSystemMenu = false;
+          Intent intent = new Intent(service, KeyboardPreferences.class);
+          intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+          service.startActivity(intent);
         }
       }
     } else if (numericMode) {
@@ -291,6 +304,16 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
       return s;
     } catch (IndexOutOfBoundsException e) {
       return "";
+    }
+  }
+
+
+  @Override
+  public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
+    Log.i("", "settings changed! " + key);
+    if (key.equals("vibration")) {
+      vibrate = preferences.getBoolean("vibration", false); 
+
     }
   }
   

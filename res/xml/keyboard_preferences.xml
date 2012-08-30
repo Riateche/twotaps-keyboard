@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="vibration"
+        android:title="@string/vibration" />
+
+    <ListPreference
+        android:defaultValue="center"
+        android:entries="@array/align_options"
+        android:entryValues="@array/align_values"
+        android:title="@string/align" />
+    <ListPreference
+        android:defaultValue="ru"
+        android:entries="@array/layout_options"
+        android:entryValues="@array/layout_values"
+        android:title="@string/layout" />
+
+    <org.idzaaus.twotaps.SeekBarPreference
+        android:defaultValue="9"
+        defaultText="@string/_default"
+        android:key="button_size"
+        android:max="30"
+        android:text=" mm"
+        android:title="Button size" />
+
+</PreferenceScreen>

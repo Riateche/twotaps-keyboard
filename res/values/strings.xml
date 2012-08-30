@@ -1,5 +1,31 @@
 <resources>
+
     <string name="app_name">Twotaps keyboard</string>
-    <string name="test">abcd\nefgh\nijkl</string>
     <string name="buttonContentDescription">-</string>
+    <string name="vibration">Vibration</string>
+    <string name="align">Align</string>
+    <string name="layout">Layout</string>
+     <string name="_default">Default</string>
+     <string name="settings_title">Twotap keyboard settings</string>
+
+    <string-array name="align_options">
+        <item>Center</item>
+        <item>Left</item>
+        <item>Right</item>
+    </string-array>
+    <string-array name="align_values">
+        <item>center</item>
+        <item>left</item>
+        <item>right</item>
+    </string-array>
+    <string-array name="layout_options">
+        <item>English</item>
+        <item>Russian</item>
+        <item>German</item>
+    </string-array>
+    <string-array name="layout_values">
+        <item>en</item>
+        <item>ru</item>
+        <item>de</item>
+    </string-array>    
 </resources>
