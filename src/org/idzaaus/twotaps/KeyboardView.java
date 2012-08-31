@@ -18,6 +18,7 @@ import android.graphics.Typeface;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -36,24 +37,23 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
   private boolean inSystemMenu = false;
   private KeyboardButton firstButton = null; // pressed button (or null if none was pressed)
   private boolean numericMode = false;
-  private boolean vibrate = true; 
+  private boolean vibrate = false; 
   private Vibrator vibrator;
-    
-  public void setNumericMode(boolean enabled) {
-    numericMode = enabled;
-    updateButtonsText();
-  }
   
-
+  enum Align { CENTER, LEFT, RIGHT };
+  private Align align = Align.CENTER;
+    
+  
   public KeyboardView(Service service) {
     super(service);
+    Log.i("", "KeyboardView construct!");
     this.service = service;
     //service.getLayoutInflater().inflate(resource, root)
     inflate(service, R.layout.keyboard, this);
     
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(service);
     preferences.registerOnSharedPreferenceChangeListener(this);
-    vibrate = preferences.getBoolean("vibration", false); 
+    loadSettings(preferences);
     vibrator = (Vibrator) service.getSystemService(Context.VIBRATOR_SERVICE);
         
     Resources r = service.getResources();
@@ -311,12 +311,47 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
   @Override
   public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
     Log.i("", "settings changed! " + key);
-    if (key.equals("vibration")) {
+    loadSettings(preferences);
+/*    if (key.equals("vibration")) {
       vibrate = preferences.getBoolean("vibration", false); 
 
-    }
+    }*/
   }
   
+  public void setNumericMode(boolean enabled) {
+    numericMode = enabled;
+    updateButtonsText();
+  }
+  
+  public void loadSettings(SharedPreferences preferences) {
+    vibrate = preferences.getBoolean("vibration", false); 
+    align = Align.valueOf(preferences.getString("align", "center").toUpperCase());
+//    LinearLayout.LayoutParams l = (LinearLayout.LayoutParams) (findViewById(R.id.layout1).getLayoutParams());
+//    l.gravity = LinearLayout.LayoutParams.
+    int gravity;
+    //align = Align.LEFT; //DEBUG!
+    switch(align) {
+    case LEFT:
+      gravity = Gravity.LEFT;
+      break;
+    case RIGHT:
+      gravity = Gravity.RIGHT;
+      break;
+    default:
+      gravity = Gravity.CENTER_HORIZONTAL;      
+    }
+    Log.i("", "align " + align);
+    ArrayList<LinearLayout> lines = new ArrayList<LinearLayout>();
+    lines.add((LinearLayout) findViewById(R.id.layout1));
+    lines.add((LinearLayout) findViewById(R.id.layout2));
+    lines.add((LinearLayout) findViewById(R.id.layout3));
+    for(LinearLayout line: lines) {
+      LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) line.getLayoutParams();
+      params.gravity = gravity;
+      line.setLayoutParams(params);
+    }
+    
+  }
 
 }
 

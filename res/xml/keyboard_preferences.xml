@@ -8,11 +8,13 @@
 
     <ListPreference
         android:defaultValue="center"
+        android:key="align"
         android:entries="@array/align_options"
         android:entryValues="@array/align_values"
         android:title="@string/align" />
     <ListPreference
         android:defaultValue="ru"
+        android:key="layout"
         android:entries="@array/layout_options"
         android:entryValues="@array/layout_values"
         android:title="@string/layout" />
