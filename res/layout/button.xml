@@ -10,8 +10,6 @@
         android:layout_alignParentTop="true"
         android:adjustViewBounds="true"
         android:background="@android:color/transparent"
-        android:maxHeight="@dimen/button_width"
-        android:maxWidth="@dimen/button_width"
         android:padding="@dimen/button_padding"
         android:scaleType="fitXY"
         android:src="@drawable/key" />

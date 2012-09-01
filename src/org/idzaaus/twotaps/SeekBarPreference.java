@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.preference.DialogPreference;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -19,7 +18,7 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
   private Context mContext;
 
   private String mDialogMessage, mSuffix, mDefaultText;
-  private int mDefault, mMax, mValue = 0;
+  private int mDefault, mMax, mMin, mValue = 0;
 
   public SeekBarPreference(Context context, AttributeSet attrs) { 
     super(context,attrs); 
@@ -28,8 +27,17 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
     mDialogMessage = attrs.getAttributeValue(androidns, "dialogMessage");
     mSuffix = attrs.getAttributeValue(androidns, "text");
     mDefault = attrs.getAttributeIntValue(androidns, "defaultValue", 0);
-    mDefaultText = "!!default!!"; //attrs.getAttributeValue("ri", "defaultText");
-    mMax = attrs.getAttributeIntValue(androidns, "max", 100);
+    for (int i = 0; i < attrs.getAttributeCount(); i++) {
+      String name = attrs.getAttributeName(i);
+      String value = attrs.getAttributeValue(i);
+      if (name.equalsIgnoreCase("min")) {
+        mMin = Integer.parseInt(value);
+      }
+      if (name.equalsIgnoreCase("max")) {
+        mMax = Integer.parseInt(value);
+      }
+    }
+    mDefaultText = context.getResources().getString(R.string.default_string);
 
   }
   @Override 
@@ -59,47 +67,62 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
     if (shouldPersist())
       mValue = getPersistedInt(mDefault);
 
-    mSeekBar.setMax(mMax);
-    mSeekBar.setProgress(mValue);
+    mSeekBar.setMax(mMax - mMin);
+    mSeekBar.setProgress(mValue - mMin);
     return layout;
   }
   @Override 
   protected void onBindDialogView(View v) {
     super.onBindDialogView(v);
-    mSeekBar.setMax(mMax);
-    mSeekBar.setProgress(mValue);
+    mSeekBar.setMax(mMax - mMin);
+    mSeekBar.setProgress(mValue - mMin);
+    updateText();
   }
   @Override
-  protected void onSetInitialValue(boolean restore, Object defaultValue)  
-  {
+  protected void onSetInitialValue(boolean restore, Object defaultValue) {
     super.onSetInitialValue(restore, defaultValue);
     if (restore) 
       mValue = shouldPersist() ? getPersistedInt(mDefault) : 0;
     else 
-      mValue = (Integer)defaultValue;
+      mValue = (Integer) defaultValue;
+    updateText();
   }
-
-  public void onProgressChanged(SeekBar seek, int value, boolean fromTouch) {
+  
+  private void updateText() {
+    if (mSeekBar == null) return;
+    int value = mSeekBar.getProgress();
+    int result = value == 0 ? -1 : value + mMin;
     if (value == 0 && mDefaultText != null) {
       mValueText.setText(mDefaultText);
     } else {
-      String t = String.valueOf(value);
+      String t = String.valueOf(result);
       mValueText.setText(mSuffix == null ? t : t.concat(mSuffix));
     }
-    if (shouldPersist())
-      persistInt(value);
-    callChangeListener(Integer.valueOf(value));
+    
   }
-  public void onStartTrackingTouch(SeekBar seek) {}
-  public void onStopTrackingTouch(SeekBar seek) {}
 
-  public void setMax(int max) { mMax = max; }
-  public int getMax() { return mMax; }
+  public void onProgressChanged(SeekBar seek, int value, boolean fromTouch) {
+    int result = value == 0 ? -1 : value + mMin;
+    if (shouldPersist())
+      persistInt(result);
+    updateText();
+    callChangeListener(Integer.valueOf(result));
+  }
+  //public void onStartTrackingTouch(SeekBar seek) {}
+  //public void onStopTrackingTouch(SeekBar seek) {}
 
-  public void setProgress(int progress) { 
+  @Override
+  public void onStartTrackingTouch(SeekBar arg0) {  }
+  @Override
+  public void onStopTrackingTouch(SeekBar arg0) { }
+
+  //public void setMax(int max) { mMax = max; }
+  //public int getMax() { return mMax; }
+
+  /*public void setProgress(int progress) { 
     mValue = progress;
     if (mSeekBar != null)
       mSeekBar.setProgress(progress); 
   }
-  public int getProgress() { return mValue; }
+  public int getProgress() { return mValue; } */
 }

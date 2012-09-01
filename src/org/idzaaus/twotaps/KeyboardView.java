@@ -12,15 +12,15 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.Point;
-import android.graphics.Typeface;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -40,6 +40,7 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
   private boolean numericMode = false;
   private boolean vibrate = false; 
   private Vibrator vibrator;
+  private int screenWidth, screenHeight;
   
   enum Align { CENTER, LEFT, RIGHT };
   private Align align = Align.CENTER;
@@ -52,9 +53,13 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
     //service.getLayoutInflater().inflate(resource, root)
     inflate(service, R.layout.keyboard, this);
     
+    WindowManager wm = (WindowManager) service.getSystemService(Context.WINDOW_SERVICE);
+    Display display = wm.getDefaultDisplay();
+    screenWidth = display.getWidth();
+    screenHeight = display.getHeight();
+    
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(service);
     preferences.registerOnSharedPreferenceChangeListener(this);
-    loadSettings(preferences);
     vibrator = (Vibrator) service.getSystemService(Context.VIBRATOR_SERVICE);
         
     Resources r = service.getResources();
@@ -85,6 +90,9 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
         buttons.add(b);
       }
     } 
+    
+    loadSettings(preferences);
+
     buttons.get(0).system_command = System_command.CAPS_LOCK;    
     buttons.get(1).system_command = System_command.NUMERIC;    
     buttons.get(2).system_command = System_command.SETTINGS;    
@@ -95,19 +103,18 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
       }
     }
     
-//    buttons.get(0).setImageResource(R.drawable.backspace);
-    
-    int singlePressButtonsCount = regularButtonsCount - 
+    /*int singlePressButtonsCount = regularButtonsCount - 
         (int) Math.ceil(layout.size() / (double) regularButtonsCount);
     Log.i("", "rbc" + regularButtonsCount + " count=" + layout.size() + " r=" + singlePressButtonsCount);
-    //TODO: most used letters here
-    String[] best_keys = { "", "", " " }; 
     for(int i = regularButtonsCount - singlePressButtonsCount; i < regularButtonsCount; i++) {        
       int best_key_id = i - regularButtonsCount + singlePressButtonsCount;
       if (best_key_id < best_keys.length) {
         getButtonByRegularNumber(i).singlePressLetter = best_keys[best_key_id];
       } 
-    }
+    }*/
+
+    //TODO: most used letters
+    getButtonByRegularNumber(regularButtonsCount - 1).singlePressLetter = " "; // space key
     
     updateButtonsText();
   }
@@ -349,6 +356,47 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
       line.setLayoutParams(params);
     }
     layout = service.getLayout(preferences.getString("layout", "ru"));
+    
+    float buttonSize = (float) preferences.getInt("button_size", -1);
+    if (buttonSize == -1) {
+      //auto
+      buttonSize = 70;  
+    }
+    
+    /*WindowManager wm = (WindowManager) service.getSystemService(Context.WINDOW_SERVICE);
+    Display display = wm.getDefaultDisplay();
+    float w, h;
+    int rotation = display.getRotation();
+    if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270) {
+      Log.i("", "ori1");
+      h = screenWidth;
+      w = screenHeight;        
+    } else {
+      Log.i("", "ori2");
+      w = screenWidth;
+      h = screenHeight;
+    }*/
+    final float scale = getResources().getDisplayMetrics().density;
+    float w = screenWidth, h = screenHeight;
+    w /= scale; //convert to dp
+    h /= scale;
+    float maxWidth = w / 5;
+    if (buttonSize > maxWidth) buttonSize = maxWidth;
+    Log.i("", "w="+w+" h="+h+ " rot=");
+    float maxHeight = (float) (0.7 * h / 3);
+    if (buttonSize > maxHeight) buttonSize = maxHeight;
+        
+    int buttonSizeInPx = (int) (buttonSize * scale + 0.5f);
+    
+
+//    Log.i("", "set button size " + button_size);
+    float fontSize = (float) (buttonSize / 4.0);
+    for(KeyboardButton b: buttons) {
+//      Log.i("", "set button size for " + b);
+      b.imageButton.setMaxHeight(buttonSizeInPx);
+      b.imageButton.setMaxWidth(buttonSizeInPx);
+      b.setFontSize(fontSize);
+    }
     
   }
 

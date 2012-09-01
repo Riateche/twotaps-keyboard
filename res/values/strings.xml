@@ -5,7 +5,7 @@
     <string name="vibration">Vibration</string>
     <string name="align">Align</string>
     <string name="layout">Layout</string>
-     <string name="_default">Default</string>
+     <string name="default_string">Default</string>
      <string name="settings_title">Twotap keyboard settings</string>
 
     <string-array name="align_options">

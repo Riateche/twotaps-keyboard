@@ -12,11 +12,8 @@ import android.content.res.Resources;
 import android.inputmethodservice.InputMethodService;
 import android.preference.PreferenceManager;
 import android.text.InputType;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.Button;
 
 public class Service extends InputMethodService {
   private ArrayList<LetterSet> letterSets   = new ArrayList<LetterSet>();

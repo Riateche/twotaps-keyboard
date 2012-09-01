@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="button_width">8.5mm</dimen>
-    <dimen name="button_padding">0.5mm</dimen>
+    <dimen name="button_padding">1dp</dimen>
     <dimen name="button_text_size">2mm</dimen>
 </resources>

@@ -1,11 +1,8 @@
 package org.idzaaus.twotaps;
 
-import android.app.Activity;
-import android.os.Bundle;
+import android.os.Bundle; 
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
-import android.view.Menu;
-import android.view.MenuInflater;
 
 public class KeyboardPreferences extends PreferenceActivity {
 

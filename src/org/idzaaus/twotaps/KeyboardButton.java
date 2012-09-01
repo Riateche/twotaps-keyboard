@@ -2,15 +2,10 @@ package org.idzaaus.twotaps;
 
 import java.util.ArrayList;
 
-import org.idzaaus.twotaps.R;
-
-import android.content.res.Resources.NotFoundException;
 import android.os.Handler;
-import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class KeyboardButton {
@@ -41,7 +36,15 @@ public class KeyboardButton {
   private boolean largeText = false;
   public TextView textView = null;
   public ImageButton imageButton = null;
-  private Service service = null;
+  //private Service service = null;
+  private float fontSize;
+
+
+  
+  public void setFontSize(float s) { 
+    fontSize = s;
+    setLargeText(largeText);
+  }
   
 /*  public void setTextView(TextView v) { 
     textView = v;
@@ -59,7 +62,6 @@ public class KeyboardButton {
     this.textView = textView;
     this.imageButton = imageButton;
     this.service = service;
-    textView.setTextAppearance(service, R.style.Button_regular);
 
     imageButton.setOnTouchListener(new View.OnTouchListener() {
       private Handler handler;
@@ -103,10 +105,11 @@ public class KeyboardButton {
   }
   
   public void setLargeText(boolean enabled) {
-    if (largeText != enabled) {
-      largeText = enabled;
-      textView.setTextAppearance(service, largeText? R.style.Button_candidate: R.style.Button_regular);
-    }
+//    if (largeText != enabled) {
+    largeText = enabled;
+    textView.setTextSize(largeText? fontSize * 2 : fontSize);
+     // textView.setTextAppearance(service, largeText? R.style.Button_candidate: R.style.Button_regular);
+  //  }
   }
   
 

@@ -20,11 +20,11 @@
         android:title="@string/layout" />
 
     <org.idzaaus.twotaps.SeekBarPreference
-        android:defaultValue="9"
-        defaultText="@string/_default"
+        android:defaultValue="-1"
         android:key="button_size"
-        android:max="30"
-        android:text=" mm"
+        min="10"
+        max="200"
+        android:text=" px"
         android:title="Button size" />
 
 </PreferenceScreen>
