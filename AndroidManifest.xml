@@ -26,6 +26,7 @@
         </service>
 
         <activity
+            android:theme="@android:style/Theme.Black"
             android:name=".KeyboardPreferences"
             android:label="@string/settings_title" >
             <intent-filter>

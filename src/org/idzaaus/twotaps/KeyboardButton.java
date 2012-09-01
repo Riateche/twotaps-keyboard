@@ -61,7 +61,7 @@ public class KeyboardButton {
   public KeyboardButton(Service service, ImageButton imageButton, TextView textView) {
     this.textView = textView;
     this.imageButton = imageButton;
-    this.service = service;
+    //this.service = service;
 
     imageButton.setOnTouchListener(new View.OnTouchListener() {
       private Handler handler;
