@@ -20,9 +20,8 @@ import android.widget.Button;
 
 public class Service extends InputMethodService {
   private ArrayList<LetterSet> letterSets   = new ArrayList<LetterSet>();
-  private ArrayList<String> allLetters      = new ArrayList<String>(); //TODO: only chosen letters 
+//  private ArrayList<String> allLetters      = new ArrayList<String>(); //TODO: only chosen letters 
   
-  public ArrayList<String> getAllLetters() { return allLetters; }
   private KeyboardView view;
   
   private void readLetterSets() {
@@ -30,19 +29,26 @@ public class Service extends InputMethodService {
     InputStream is = res.openRawResource(R.raw.layout);
     BufferedReader input = new BufferedReader(new InputStreamReader(is), 1024 * 8);
     String line = null;
+    LetterSet letterSet = null;
     try {
       while (( line = input.readLine()) != null) {
-        int i = line.indexOf(':');
-        if (i < 0) {
-          //Log.e("readLetterSets", "Missing ':' character in line");
-          //return;
-          continue;
+        line = line.trim();
+        if (line.length() == 0) continue; 
+        if (line.startsWith("* ")) {
+          if (letterSet != null) {
+            letterSets.add(letterSet);
+          }
+          letterSet = new LetterSet();
+          letterSet.name = line.substring(2);
+          letterSet.letters = new ArrayList<String>();
+        } else {
+          if (letterSet != null) {
+            letterSet.letters.addAll(Arrays.asList(line.split("\\s+")));
+          }
         }
-        LetterSet s = new LetterSet();
-        s.name = line.substring(0, i);
-        s.letters = new ArrayList<String>(Arrays.asList(line.substring(i + 2).split(" ")));
-        letterSets.add(s);
-        Log.i("readLetterSets", "Added letter set: " + s.name);
+        if (letterSet != null) {
+          letterSets.add(letterSet);
+        }
       }
     } catch (IOException e) {
       e.printStackTrace();
@@ -53,11 +59,8 @@ public class Service extends InputMethodService {
   public View onCreateInputView() {   
     PreferenceManager.setDefaultValues(this, R.xml.keyboard_preferences, false);
     
-    if (letterSets.isEmpty()) {
+    if (letterSets.size() == 0) {
       readLetterSets();
-      for(int i = 0; i < letterSets.size(); i++) {
-        allLetters.addAll(letterSets.get(i).letters);
-      }
     }
 
     view = new KeyboardView(this);
@@ -79,6 +82,22 @@ public class Service extends InputMethodService {
     for(int i = 0; i < letter.length(); i++) {
       sendKeyChar(letter.charAt(i));
     }
+  }
+  
+  public ArrayList<String> getLayout(String code) {
+    ArrayList<String> r = new ArrayList<String>();
+    r.addAll(getLetterSet("latin").letters);
+    if (!code.equals("en")) {
+      r.addAll(getLetterSet(code).letters);
+    }
+    return r;
+  }
+  
+  private LetterSet getLetterSet(String name) {
+    for(LetterSet s: letterSets) {
+      if (s.name.equals(name)) return s;
+    }
+    return null;
   }
   
 } 

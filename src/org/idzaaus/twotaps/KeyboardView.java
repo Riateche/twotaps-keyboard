@@ -30,6 +30,7 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
   private Service service;
   private Point buttonsCount                = new Point(5, 3);
   private ArrayList<KeyboardButton> buttons = new ArrayList<KeyboardButton>();
+  private ArrayList<String> layout = null;
   
   private final int regularButtonsCount = 12;
   private boolean shiftPressed = false;
@@ -97,8 +98,8 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
 //    buttons.get(0).setImageResource(R.drawable.backspace);
     
     int singlePressButtonsCount = regularButtonsCount - 
-        (int) Math.ceil(service.getAllLetters().size() / (double) regularButtonsCount);
-    Log.i("", "rbc" + regularButtonsCount + " count=" + service.getAllLetters().size() + " r=" + singlePressButtonsCount);
+        (int) Math.ceil(layout.size() / (double) regularButtonsCount);
+    Log.i("", "rbc" + regularButtonsCount + " count=" + layout.size() + " r=" + singlePressButtonsCount);
     //TODO: most used letters here
     String[] best_keys = { "", "", " " }; 
     for(int i = regularButtonsCount - singlePressButtonsCount; i < regularButtonsCount; i++) {        
@@ -299,7 +300,7 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
   
   private String letterAt(KeyboardButton firstButton, KeyboardButton secondButton) {
     try {
-      String s = service.getAllLetters().get(firstButton.regularNumber * regularButtonsCount + secondButton.regularNumber);
+      String s = layout.get(firstButton.regularNumber * regularButtonsCount + secondButton.regularNumber);
       if (capsEnabled ^ shiftPressed) s = s.toUpperCase();      
       return s;
     } catch (IndexOutOfBoundsException e) {
@@ -312,10 +313,7 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
   public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
     Log.i("", "settings changed! " + key);
     loadSettings(preferences);
-/*    if (key.equals("vibration")) {
-      vibrate = preferences.getBoolean("vibration", false); 
-
-    }*/
+    updateButtonsText();
   }
   
   public void setNumericMode(boolean enabled) {
@@ -350,6 +348,7 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
       params.gravity = gravity;
       line.setLayoutParams(params);
     }
+    layout = service.getLayout(preferences.getString("layout", "ru"));
     
   }
 

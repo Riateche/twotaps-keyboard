@@ -6,7 +6,7 @@
         android:key="vibration"
         android:title="@string/vibration" />
 
-    <ListPreference
+    <ListPreference               
         android:defaultValue="center"
         android:key="align"
         android:entries="@array/align_options"
