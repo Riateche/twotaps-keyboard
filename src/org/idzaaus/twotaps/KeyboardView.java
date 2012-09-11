@@ -26,14 +26,14 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class KeyboardView extends LinearLayout  implements OnClickListener, KeyboardButton.OnHoldListener, OnSharedPreferenceChangeListener {
+public class KeyboardView extends LinearLayout  implements KeyboardButton.OnHoldListener, OnSharedPreferenceChangeListener {
   private Service service;
-  private Point buttonsCount                = new Point(5, 3);
+  private Point buttonsCount                = new Point(6, 3);
   private ArrayList<KeyboardButton> buttons = new ArrayList<KeyboardButton>();
   private ArrayList<LinearLayout> rowLayouts = new ArrayList<LinearLayout>();
   private ArrayList<String> layout = null;
   
-  private final int regularButtonsCount = 12;
+  private int regularButtonsCount = 0;
   private boolean shiftPressed = false;
   private boolean capsEnabled = false;
   private boolean inSystemMenu = false;
@@ -73,7 +73,11 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
       for(int x = 0; x < buttonsCount.x; x++) {
         View v = service.getLayoutInflater().inflate(R.layout.button, null);
         row.addView(v);
-        KeyboardButton b = new KeyboardButton(service, (ImageButton) v.findViewById(R.id.button), (TextView) v.findViewById(R.id.text));
+        KeyboardButton b = new KeyboardButton(
+            service, 
+            (ImageButton) v.findViewById(R.id.button), 
+            (TextView) v.findViewById(R.id.text),
+            (TextView) v.findViewById(R.id.candidate_text));
         b.number = x + y * buttonsCount.x;
         b.x = x;
         b.y = y;
@@ -84,15 +88,14 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
           } else if (y == 1) {
             b.type = Type.SHIFT;
           } else if (y == 2) {
-            b.type = Type.SYSTEM_MENU;
+            b.type = Type.SPACE;
           }
         } else {
           b.type = Type.REGULAR;
+          regularButtonsCount++;
           b.regularNumber = x + y * (buttonsCount.x - 1);
         }
-        
-        
-        b.imageButton.setOnClickListener(this);
+                
         b.addOnHoldListener(this);
         buttons.add(b);
       }
@@ -110,18 +113,8 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
       }
     }
     
-    /*int singlePressButtonsCount = regularButtonsCount - 
-        (int) Math.ceil(layout.size() / (double) regularButtonsCount);
-    Log.i("", "rbc" + regularButtonsCount + " count=" + layout.size() + " r=" + singlePressButtonsCount);
-    for(int i = regularButtonsCount - singlePressButtonsCount; i < regularButtonsCount; i++) {        
-      int best_key_id = i - regularButtonsCount + singlePressButtonsCount;
-      if (best_key_id < best_keys.length) {
-        getButtonByRegularNumber(i).singlePressLetter = best_keys[best_key_id];
-      } 
-    }*/
-
-    //TODO: most used letters
     getButtonByRegularNumber(regularButtonsCount - 1).singlePressLetter = " "; // space key
+    firstButton = buttons.get(0);
     
     updateButtonsText();
   }
@@ -166,6 +159,10 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
           button.setLargeText(false);
           button.imageButton.setImageResource(R.drawable.key_backspace);
           button.textView.setText("");
+        } else if (button.type == Type.BACKSPACE) {
+          button.setLargeText(false);
+          button.imageButton.setImageResource(R.drawable.key_space);
+          button.textView.setText("");
         } else if (button.type == Type.SYSTEM_MENU) {
           button.setLargeText(false);
           button.textView.setText("ABC");          
@@ -181,6 +178,7 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
         button.imageButton.setImageResource(R.drawable.key_background);
         boolean candidate = false;
         String text;
+        String candidateText = "";
         //KeyboardButton button = buttons.get(i); 
         if (button.type == null) continue;
         switch(button.type) {
@@ -191,6 +189,10 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
           } else {
             text = "";
           }
+          break; 
+        case SPACE:
+          button.imageButton.setImageResource(R.drawable.key_space);
+          text = "";
           break; 
         case SYSTEM_MENU: 
           button.imageButton.setImageResource(R.drawable.key_settings);
@@ -218,42 +220,29 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
                 if (j % 4 == 0 && j > 0) text += "\n"; 
                 text += letterAt(button, getButtonByRegularNumber(j));
               }
-              /*text = letterAt(button, getButtonByRegularNumber(0)) + " " + 
-                  letterAt(button, getButtonByRegularNumber(regularButtonsCount / 2)) + " " + 
-                  letterAt(button, getButtonByRegularNumber(regularButtonsCount - 1)); */ 
             }
           } else {
-            candidate = true;
-            text = letterAt(firstButton, button);
+            //candidate = true;
+            candidateText = letterAt(firstButton, button);
+            text = "";
+            for(int j = 0; j < regularButtonsCount; j ++) {
+              if (j % 5 == 0 && j > 0) text += "\n"; 
+              text += letterAt(button, getButtonByRegularNumber(j));
+            }            
           }
           break;
         default:
           text = "";  
         }
         button.textView.setText(text);
+        button.candidateTextView.setText(candidateText);
         button.setLargeText(candidate);
       }
     }
   }
   
   @Override
-  public void onClick(View v) {
-    //TODO: optimize
-    for(KeyboardButton button: buttons) {
-      if (button.imageButton == v) {
-        onClickOrHold(button, false);
-        return;
-      }
-    }
-  }
-
-  @Override
-  public void onKeyboardButtonHold(KeyboardButton target) {
-    onClickOrHold(target, true);
-  }
-
-  
-  private void onClickOrHold(KeyboardButton button, boolean hold) {
+  public void onKeyboardButtonHold(KeyboardButton button, boolean hold) {
     if (vibrate) {
       vibrator.vibrate(80);
     }
@@ -287,12 +276,15 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
         if (!hold) shiftPressed = !shiftPressed;
       } else if (button.type == Type.SYSTEM_MENU) {
         inSystemMenu = true;
+      } else if (button.type == Type.SPACE) {
+        service.typeLetter(" ");
+        return;
       } else if (button.type == Type.BACKSPACE) {
-        if (firstButton != null) {
-          firstButton = null;
-        } else {
-          service.sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL);
-        }
+        //if (firstButton != null) {
+        //  firstButton = null;
+        //} else {
+        service.sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL);
+        //}
       } else if (button.type == Type.REGULAR) {
         if (firstButton == null) {
           if (button.singlePressLetter != null) {
@@ -305,13 +297,14 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
           service.typeLetter(letterAt(firstButton, button));
           if (!hold) {
             shiftPressed = false;
-            firstButton = null;        
+            //firstButton = null;        
           }
         }
       }
     }
     updateButtonsText();           
   }
+
   
   private String letterAt(KeyboardButton firstButton, KeyboardButton secondButton) {
     try {
@@ -369,9 +362,9 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
     float w = screenWidth, h = screenHeight;
     w /= scale; //convert to dp
     h /= scale;
-    float maxWidth = w / 5;
+    float maxWidth = w / buttonsCount.x;
     if (buttonSize > maxWidth) buttonSize = maxWidth;
-    float maxHeight = (float) (0.7 * h / 3);
+    float maxHeight = (float) (0.7 * h / buttonsCount.y);
     if (buttonSize > maxHeight) buttonSize = maxHeight;
         
     int buttonSizeInPx = (int) (buttonSize * scale + 0.5f);
@@ -383,6 +376,15 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
       b.setFontSize(fontSize);
     }
     
+  }
+
+  @Override
+  public void onKeyboardButtonMove(KeyboardButton target) {
+    //Log.i("", "move!");
+    if (target.type == Type.REGULAR) {
+      firstButton = target;
+      updateButtonsText();
+    }
   }
 
 }

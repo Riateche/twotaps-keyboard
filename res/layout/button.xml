@@ -4,7 +4,7 @@
     android:layout_height="wrap_content" >
 
     <ImageButton
-        android:id="@+id/button"
+        android:id="@+id/button" 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -20,8 +20,24 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:gravity="center_vertical|center_horizontal"
-        android:textColor="@android:color/white"
-        android:textSize="@dimen/button_text_size" />
+        android:paddingBottom="0dp"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
+        android:paddingTop="0dp"
+        android:text="bbbbb"
+        android:textColor="@android:color/white" />
+
+    <TextView
+        android:id="@+id/candidate_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/button"
+        android:layout_alignRight="@+id/button"
+        android:paddingBottom="@dimen/candidateTextPadding"
+        android:paddingLeft="0dp"
+        android:paddingRight="@dimen/candidateTextPadding"
+        android:paddingTop="0dp"
+        android:textColor="#0f0"
+        android:textSize="40dp" />
 
 </RelativeLayout>
