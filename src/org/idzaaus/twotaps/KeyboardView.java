@@ -7,11 +7,11 @@ import org.idzaaus.twotaps.KeyboardButton.Type;
 
 import org.idzaaus.twotaps.R;
 
+import android.R.color;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.content.res.Resources;
 import android.graphics.Point;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
@@ -30,6 +30,7 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
   private Service service;
   private Point buttonsCount                = new Point(5, 3);
   private ArrayList<KeyboardButton> buttons = new ArrayList<KeyboardButton>();
+  private ArrayList<LinearLayout> rowLayouts = new ArrayList<LinearLayout>();
   private ArrayList<String> layout = null;
   
   private final int regularButtonsCount = 12;
@@ -50,8 +51,10 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
     super(service);
     Log.i("", "KeyboardView construct!");
     this.service = service;
-    //service.getLayoutInflater().inflate(resource, root)
-    inflate(service, R.layout.keyboard, this);
+    setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+    setOrientation(LinearLayout.VERTICAL);
+    setBackgroundResource(color.black); 
+    
     
     WindowManager wm = (WindowManager) service.getSystemService(Context.WINDOW_SERVICE);
     Display display = wm.getDefaultDisplay();
@@ -61,16 +64,20 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(service);
     preferences.registerOnSharedPreferenceChangeListener(this);
     vibrator = (Vibrator) service.getSystemService(Context.VIBRATOR_SERVICE);
-        
-    Resources r = service.getResources();
+         
+    //Log.i("", "start creating buttons");
     for(int y = 0; y < buttonsCount.y; y++) {
+      LinearLayout row = new LinearLayout(service);
+      rowLayouts.add(row);
+      addView(row, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
       for(int x = 0; x < buttonsCount.x; x++) {
-        int res_id = r.getIdentifier("button" + (y+1) + "_" + (x+1), "id", "org.idzaaus.twotaps");
-        View view = findViewById(res_id);
-        KeyboardButton b = new KeyboardButton(service, (ImageButton) view.findViewById(R.id.button), (TextView) view.findViewById(R.id.text));
+        View v = service.getLayoutInflater().inflate(R.layout.button, null);
+        row.addView(v);
+        KeyboardButton b = new KeyboardButton(service, (ImageButton) v.findViewById(R.id.button), (TextView) v.findViewById(R.id.text));
         b.number = x + y * buttonsCount.x;
         b.x = x;
         b.y = y;
+        //Log.i("", "create button " + x + " " + y);
         if (x == buttonsCount.x - 1) {
           if (y == 0) {
             b.type = Type.BACKSPACE;
@@ -175,6 +182,7 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
         boolean candidate = false;
         String text;
         //KeyboardButton button = buttons.get(i); 
+        if (button.type == null) continue;
         switch(button.type) {
         case BACKSPACE:
           button.imageButton.setImageResource(R.drawable.key_backspace);
@@ -331,10 +339,7 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
   public void loadSettings(SharedPreferences preferences) {
     vibrate = preferences.getBoolean("vibration", false); 
     align = Align.valueOf(preferences.getString("align", "center").toUpperCase());
-//    LinearLayout.LayoutParams l = (LinearLayout.LayoutParams) (findViewById(R.id.layout1).getLayoutParams());
-//    l.gravity = LinearLayout.LayoutParams.
     int gravity;
-    //align = Align.LEFT; //DEBUG!
     switch(align) {
     case LEFT:
       gravity = Gravity.LEFT;
@@ -345,12 +350,9 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
     default:
       gravity = Gravity.CENTER_HORIZONTAL;      
     }
-    Log.i("", "align " + align);
-    ArrayList<LinearLayout> lines = new ArrayList<LinearLayout>();
-    lines.add((LinearLayout) findViewById(R.id.layout1));
-    lines.add((LinearLayout) findViewById(R.id.layout2));
-    lines.add((LinearLayout) findViewById(R.id.layout3));
-    for(LinearLayout line: lines) {
+    Log.i("", "setting gravity");
+    for(LinearLayout line: rowLayouts) {
+      Log.i("", "gravity " + gravity + " for" + line);
       LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) line.getLayoutParams();
       params.gravity = gravity;
       line.setLayoutParams(params);
@@ -363,36 +365,19 @@ public class KeyboardView extends LinearLayout  implements OnClickListener, Keyb
       buttonSize = 70;  
     }
     
-    /*WindowManager wm = (WindowManager) service.getSystemService(Context.WINDOW_SERVICE);
-    Display display = wm.getDefaultDisplay();
-    float w, h;
-    int rotation = display.getRotation();
-    if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270) {
-      Log.i("", "ori1");
-      h = screenWidth;
-      w = screenHeight;        
-    } else {
-      Log.i("", "ori2");
-      w = screenWidth;
-      h = screenHeight;
-    }*/
     final float scale = getResources().getDisplayMetrics().density;
     float w = screenWidth, h = screenHeight;
     w /= scale; //convert to dp
     h /= scale;
     float maxWidth = w / 5;
     if (buttonSize > maxWidth) buttonSize = maxWidth;
-    Log.i("", "w="+w+" h="+h+ " rot=");
     float maxHeight = (float) (0.7 * h / 3);
     if (buttonSize > maxHeight) buttonSize = maxHeight;
         
     int buttonSizeInPx = (int) (buttonSize * scale + 0.5f);
     
-
-//    Log.i("", "set button size " + button_size);
     float fontSize = (float) (buttonSize / 4.0);
     for(KeyboardButton b: buttons) {
-//      Log.i("", "set button size for " + b);
       b.imageButton.setMaxHeight(buttonSizeInPx);
       b.imageButton.setMaxWidth(buttonSizeInPx);
       b.setFontSize(fontSize);
