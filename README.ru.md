@@ -7,7 +7,7 @@ twotaps-keyboard
 
 [Google Play](https://play.google.com/store/apps/details?id=org.idzaaus.twotaps)
 
-[Скачать APK](https://github.com/Riateche/twotaps-keyboard/raw/master/apk/twotaps-keyboard-0.2.apk)
+[Скачать APK](https://github.com/Riateche/twotaps-keyboard/raw/release-0.2/apk/twotaps-keyboard-0.2.apk)
 
 Twotaps - экранная клавиатура, созданная для быстрой печати. После небольшой тренировки вы сможете набирать текст с большой скоростью. Каждый символ набирается нажатием двух кнопок. Сначала нажмите кнопку, на которой изображен нужный символ, а затем кнопку, соответствующую этому символу (на кнопках появятся соответствующие надписи). Если нужно набрать заглавную букву, нажмите перед этим кнопку shift (правая во втором ряду). Используйте кнопку удаления символа для отмена ввода.
 
