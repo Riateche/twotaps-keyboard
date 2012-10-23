@@ -7,7 +7,7 @@ twotaps-keyboard
 
 [Google Play](https://play.google.com/store/apps/details?id=org.idzaaus.twotaps)
 
-[Download APK](https://github.com/Riateche/twotaps-keyboard/raw/master/apk/twotaps-keyboard-0.2.apk)
+[Download APK](https://github.com/Riateche/twotaps-keyboard/raw/release-0.2/apk/twotaps-keyboard-0.2.apk)
 
 Twotaps is on-screen keyboard created for fast typing. After some training you will be able to type text very fast. Every symbol can be typed by pressing two buttons. Firstly press the button containing wanted symbol, then press another one (appropriate captions will appear on all buttons). If you want to type capitalized letter press shift before. Use backspace key to cancel input.
 
